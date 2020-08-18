@@ -2,7 +2,7 @@ const axios = require('axios').default;
 const { Readability } = require('@mozilla/readability');
 const { JSDOM } = require('jsdom');
 
-const token = 'b806c769-04a8-4607-b877-f4b8c6bba2d2';
+const token = '';
 const collection = '-1';
 const wpm = 250;
 const tagPrefix = 'time-';
