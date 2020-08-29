@@ -1,11 +1,22 @@
+require('dotenv').config();
+
+const { CronJob } = require('cron');
 const axios = require('axios').default;
 const { Readability } = require('@mozilla/readability');
 const { JSDOM } = require('jsdom');
 
-const token = '';
-const collection = '-1';
-const wpm = 250;
-const tagPrefix = 'time-';
+const {
+  RAINDROP_TOKEN: token,
+  RAINDROP_COLLECTION: collection = '-1',
+  CONFIG_WPM = '250',
+  CONFIG_TAG_PREFIX: tagPrefix = 'time-',
+  CONFIG_SCHEDULE = '0 0 * * * *',
+} = process.env;
+
+const wpm = parseInt(CONFIG_WPM, 10);
+if (Number.isNaN(wpm)) {
+  throw new Error('CONFIG_WPM should be an integer!');
+}
 
 const api = axios.create({
   baseURL: 'https://api.raindrop.io/rest/v1',
@@ -13,6 +24,8 @@ const api = axios.create({
 });
 
 const processCollection = async (collectionId = '-1') => {
+  console.log('Processing your droplets...');
+
   let updated = 0;
   const drops = [];
 
@@ -24,6 +37,8 @@ const processCollection = async (collectionId = '-1') => {
       x = 50;
     }
   }
+
+  console.log(`Found ${drops} droplets to process...`);
 
   await Promise.all(drops.map(async (item) => {
     try {
@@ -47,11 +62,18 @@ const processCollection = async (collectionId = '-1') => {
 
       updated += 1;
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }));
 
-  console.log(`Updated ${updated} raindrops`);
+  console.log(`Updated ${updated} droplets...`);
 };
 
-processCollection(collection);
+console.log('Configuring raindrop-io-tools...');
+
+// @ts-ignore
+const job = new CronJob(CONFIG_SCHEDULE, () => {
+  processCollection(collection);
+}, null, true, 'Australia/Brisbane');
+
+job.start();
