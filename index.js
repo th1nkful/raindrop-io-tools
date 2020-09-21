@@ -1,16 +1,15 @@
+// Primarily for local development
 require('dotenv').config();
 
-const { CronJob } = require('cron');
 const axios = require('axios').default;
 const { Readability } = require('@mozilla/readability');
 const { JSDOM } = require('jsdom');
 
 const {
   RAINDROP_TOKEN: token,
-  RAINDROP_COLLECTION: collection = '-1',
+  RAINDROP_COLLECTION: collectionId = '-1',
   CONFIG_WPM = '250',
   CONFIG_TAG_PREFIX: tagPrefix = 'time-',
-  CONFIG_SCHEDULE = '0 0 * * * *',
 } = process.env;
 
 const wpm = parseInt(CONFIG_WPM, 10);
@@ -23,7 +22,7 @@ const api = axios.create({
   headers: { Authorization: `Bearer ${token}` },
 });
 
-const processCollection = async (collectionId = '-1') => {
+exports.processUnsorted = async (req, res) => {
   console.log('Processing your droplets...');
 
   let updated = 0;
@@ -33,7 +32,7 @@ const processCollection = async (collectionId = '-1') => {
     const { data: { items } } = await api.get(`/raindrops/${collectionId}?perpage=50&page=${x}`);
     drops.push(...items);
     if (items.length === 0) {
-      // end the loop early
+      // end the loop early for pages with less than 50 items
       x = 50;
     }
   }
@@ -67,13 +66,5 @@ const processCollection = async (collectionId = '-1') => {
   }));
 
   console.log(`Updated ${updated} droplets...`);
+  res.sendStatus(200);
 };
-
-console.log('Configuring raindrop-io-tools...');
-
-// @ts-ignore
-const job = new CronJob(CONFIG_SCHEDULE, () => {
-  processCollection(collection);
-}, null, true, 'Australia/Brisbane');
-
-job.start();
