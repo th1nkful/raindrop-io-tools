@@ -4,7 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "deploy:function": "gcloud functions deploy processUnsorted --env-vars-file .env.yaml --runtime nodejs10 --trigger-http --allow-unauthenticated"
   },
   "author": "th1nkful",
@@ -13,7 +12,8 @@
     "@mozilla/readability": "^0.3.0",
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
-    "jsdom": "^16.4.0"
+    "jsdom": "^16.4.0",
+    "ytdl-core": "^3.2.2"
   },
   "devDependencies": {
     "@types/node": "^14.6.2"

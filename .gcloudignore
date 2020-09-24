@@ -18,6 +18,7 @@ example.env
 LICENSE
 README.md
 .editorconfig
+run.js
 
 node_modules
 #!include:.gitignore
