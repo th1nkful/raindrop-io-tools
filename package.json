@@ -13,6 +13,7 @@
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
     "jsdom": "^16.4.0",
+    "p-map": "^4.0.0",
     "ytdl-core": "^3.2.2"
   },
   "devDependencies": {

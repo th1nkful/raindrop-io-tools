@@ -1,6 +1,7 @@
 // For local development
 require('dotenv').config();
 
+const promiseMap = require('p-map');
 const axios = require('axios').default;
 const { Readability } = require('@mozilla/readability');
 const { JSDOM } = require('jsdom');
@@ -11,7 +12,6 @@ const {
   RAINDROP_COLLECTION: collectionId = '-1',
   CONFIG_WPM = '250',
   CONFIG_TAG_PREFIX: tagPrefix = 'time-',
-  NODE_ENV: environment,
 } = process.env;
 
 const wpm = parseInt(CONFIG_WPM, 10);
@@ -57,11 +57,9 @@ const getAllDrops = async () => {
   return drops;
 };
 
-const calculateContent = async ({ _id, tags, link }) => {
-  // Download and parse the document
-  const { data: source } = await axios.get(link);
-  const doc = new JSDOM(source, { url: link });
-  const { textContent } = new Readability(doc.window.document, {}).parse();
+const calculateContent = async ({ _id, tags, link: url }) => {
+  const { window } = await JSDOM.fromURL(url);
+  const { textContent } = new Readability(window.document, {}).parse();
 
   // estimate the number of minutes to read content
   const words = textContent.match(/(\w+)/g).length;
@@ -69,6 +67,14 @@ const calculateContent = async ({ _id, tags, link }) => {
 
   // Add the time tag to the bookmark
   await updateTags(_id, tags, minutes);
+};
+
+const truncate = (text = '', length = 50) => {
+  if (text.length <= length) {
+    return text;
+  }
+
+  return `${text.slice(0, length)}...`;
 };
 
 exports.processUnsorted = async (req, res) => {
@@ -79,34 +85,42 @@ exports.processUnsorted = async (req, res) => {
 
   console.log(`Found ${drops.length} droplets to process...`);
 
-  await Promise.all(drops.map(async (item) => {
-    try {
-      // Only process bookmarks without a time tag yet
-      if (hasTimeTag(item.tags)) {
-        return;
-      }
+  try {
+    await promiseMap(drops, async (item) => {
+      try {
+        // Only process bookmarks without a time tag yet
+        if (hasTimeTag(item.tags)) {
+          return;
+        }
 
-      // Process youtube.com videos
-      if (item.domain.includes('youtube.com')) {
-        await calculateYouTube(item);
+        console.log(`Checking URL: ${truncate(item.link)}`);
+
+        // Process youtube.com videos
+        if (item.domain.includes('youtube.com')) {
+          await calculateYouTube(item);
+          updated += 1;
+          return;
+        }
+
+        // Try process all other content
+        await calculateContent(item);
         updated += 1;
-        return;
-      }
-
-      // Try process all other content
-      await calculateContent(item);
-      updated += 1;
-    } catch (error) {
-      if (environment === 'development') {
+      } catch (error) {
         console.error(error);
+
+        // Add a 0 minute tag so we don't repeatedly
+        // try process the same droplet
+        await updateTags(item._id, item.tags, 0);
       }
+    }, {
+      stopOnError: false,
+      concurrency: 1,
+    });
 
-      // Add a 0 minute tag so we don't repeatedly
-      // try process the same droplet
-      await updateTags(item._id, item.tags, 0);
-    }
-  }));
+    console.log(`Updated ${updated} droplets.`);
+  } catch (error) {
+    console.error(error);
+  }
 
-  console.log(`Updated ${updated} droplets...`);
   res.sendStatus(200);
 };
