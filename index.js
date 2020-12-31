@@ -102,7 +102,13 @@ exports.processUnsorted = async (req, res) => {
           return;
         }
 
-        // Try process all other content
+        if (item.type != 'article') {
+          await updateTags(item._id, item.tags, 0);
+          updated += 1;
+          return;
+        }
+        
+        // Try process content of article type
         await calculateContent(item);
         updated += 1;
       } catch (error) {
