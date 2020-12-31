@@ -26,6 +26,14 @@ const api = axios.create({
 
 const hasTimeTag = (tags) => tags.find((tag) => tag.includes(tagPrefix));
 
+const addTag = async ({ _id, tags }, tag) => {
+  const tag = `${tagPrefix}${tag}`;
+
+  return api.put(`/raindrop/${_id}`, {
+    tags: [...tags, tag],
+  });
+};
+
 const updateTags = async (id, tags, length) => {
   const tag = `${tagPrefix}${Math.round(length)}mins`;
 
@@ -103,7 +111,7 @@ exports.processUnsorted = async (req, res) => {
         }
 
         if (item.type != 'article') {
-          await updateTags(item._id, item.tags, 0);
+          await addTag(item, item.type);
           updated += 1;
           return;
         }
