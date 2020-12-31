@@ -100,11 +100,11 @@ exports.processUnsorted = async (req, res) => {
           await calculateYouTube(item);
           updated += 1;
           return;
-}
+        }
 
         if (item.type != 'article') {
           await updateTags(item._id, item.tags, 0);
-        updated += 1;
+          updated += 1;
           return;
         }
         
@@ -116,7 +116,7 @@ exports.processUnsorted = async (req, res) => {
 
         // Add a 0 minute tag so we don't repeatedly
         // try process the same droplet
-      await updateTags(item._id, item.tags, 0);
+        await updateTags(item._id, item.tags, 0);
       }
     }, {
       stopOnError: false,
