@@ -4,8 +4,8 @@ const tagCleanup = require('./tagCleanup');
 
 exports.processUnsorted = async (req, res) => {
   await promiseAll([
-    () => addReadTime(req, res),
-    () => tagCleanup(req, res),
+    () => addReadTime(),
+    () => tagCleanup(),
   ], { stopOnError: false });
   
   res.sendStatus(200);

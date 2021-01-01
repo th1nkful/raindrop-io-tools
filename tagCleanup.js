@@ -36,7 +36,7 @@ const replaceTags = async ({ _id }, tags) => api.put(`/raindrop/${_id}`, { tags 
 const zapier = 'zapier';
 const inoreader = 'inoreader';
 
-module.exports = async (req, res) => {
+module.exports = async () => {
   const drops = await getAllDrops();
   
   try {
@@ -45,14 +45,16 @@ module.exports = async (req, res) => {
       const { tags } = item;
       
       const hasTagsToClean = tags
-        .some((tag) => remove.includes(tag));
+        .some((tag) => remove
+          .includes(tag));
         
       if (!hasTagsToClean) {
         return;
       }
     
       const cleanedTags = tags
-        .filter((tag) => !remove.includes(tag));
+        .filter((tag) => !remove
+          .includes(tag));
         
       await replaceTags(item, cleanedTags);
     }, {
