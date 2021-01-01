@@ -27,10 +27,10 @@ const api = axios.create({
 const hasTimeTag = (tags) => tags.find((tag) => tag.includes(tagPrefix));
 
 const addTag = async ({ _id, tags }, tag) => {
-  const tag = `${tagPrefix}${tag}`;
+  const prefixedTag = `${tagPrefix}${tag}`;
 
   return api.put(`/raindrop/${_id}`, {
-    tags: [...tags, tag],
+    tags: [...tags, prefixedTag],
   });
 };
 
@@ -85,7 +85,7 @@ const truncate = (text = '', length = 50) => {
   return `${text.slice(0, length)}...`;
 };
 
-module.exports = async (req, res) => {
+module.exports = async () => {
   console.log('Processing your droplets...');
 
   let updated = 0;

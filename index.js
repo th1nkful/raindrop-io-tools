@@ -2,7 +2,7 @@ const promiseAll = require('p-all');
 const addReadTime = require('./addReadTime');
 const tagCleanup = require('./tagCleanup');
 
-exports.processUnsorted = async (req, res) => {
+exports.processUnsorted = async () => {
   await promiseAll([
     () => addReadTime(req, res),
     () => tagCleanup(req, res),
