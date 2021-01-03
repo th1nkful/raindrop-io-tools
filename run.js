@@ -1,2 +1,3 @@
-const { processUnsorted } = require('./');
-processUnsorted(null, { sendStatus: () => {} });
+const fn = require('.');
+
+fn.processUnsorted(undefined, { sendStatus: () => {} });
