@@ -6,19 +6,22 @@
 # For more information, run:
 #   $ gcloud topic gcloudignore
 #
+
 .gcloudignore
-# If you would like to upload your .git directory, .gitignore file or files
-# from your .gitignore file, remove the corresponding line
-# below:
 .git
 .gitignore
 
 .env
 example.env
+.eslintrc.js
+.editorconfig
+cloudbuild.yaml
+
 LICENSE
 README.md
-.editorconfig
+
 run.js
 
 node_modules
+tests
 #!include:.gitignore
