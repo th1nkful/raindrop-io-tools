@@ -110,7 +110,7 @@ module.exports = async () => {
           return;
         }
 
-        if (item.type != 'article') {
+        if (item.type != 'article' && item.type != 'link') {
           await addTag(item, item.type);
           updated += 1;
           return;
